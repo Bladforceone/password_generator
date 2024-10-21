@@ -29,7 +29,7 @@ func main() {
 		fmt.Println("Password:", password)
 	}
 
-	fmt.Println("Save the result in password.txt? y/n")
+	fmt.Println("Save the result in Documents/password.txt? y/n")
 
 	var input string
 	fmt.Scan(&input)
