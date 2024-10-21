@@ -18,15 +18,22 @@ func main() {
 
 	flag.Parse()
 
-	save := []string{}
+	ch := make(chan string)
 	for i := 0; i < *count; i++ {
-		password, err := generator.GeneratePassword(*length, *letter, *number, *special)
-		save = append(save, password)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println("Password:", password)
+		go func() {
+			password, err := generator.GeneratePassword(*length, *letter, *number, *special)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			ch <- password
+		}()
+	}
+
+	save := []string{}
+	for i := range *count {
+		save = append(save, <-ch)
+		fmt.Printf("Password: %s \n", save[i])
 	}
 
 	fmt.Println("Save the result in Documents/password.txt? y/n")
@@ -42,12 +49,12 @@ func main() {
 		}
 
 		documentsPath := filepath.Join(homeDir, "Documents", "password.txt")
-
-		file, err := os.OpenFile(documentsPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(documentsPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(3)
 		}
+		defer file.Close()
 
 		for i := range save {
 			_, err := file.WriteString(save[i] + "\n")
