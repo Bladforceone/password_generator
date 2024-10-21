@@ -59,4 +59,5 @@ func main() {
 
 		fmt.Println("Saved")
 	}
+	os.Exit(0)
 }
